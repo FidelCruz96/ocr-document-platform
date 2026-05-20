@@ -34,9 +34,12 @@ OCR Processor mock
 2. El worker busca el documento en PostgreSQL.
 3. Cambia estado a `processing`.
 4. Descarga el archivo desde MinIO.
-5. Ejecuta OCR mock controlado.
+5. Ejecuta OCR mock controlado a traves de un proveedor reemplazable.
 6. Guarda `ocr_text`, `processed_at` y estado `completed`.
-7. Si ocurre un error, guarda `error_message` y estado `failed`.
+7. Si ocurre un error, Celery reintenta la tarea hasta 3 veces.
+8. Si se agotan los reintentos, guarda `error_message` y estado `failed`.
+
+El worker no reprocesa documentos que ya estan en `completed`, lo que da idempotencia basica frente a reintentos o ejecuciones duplicadas.
 
 ## Decisiones tecnicas
 
@@ -46,6 +49,7 @@ OCR Processor mock
 - **Redis + Celery**: procesamiento asincrono real sin bloquear requests HTTP.
 - **Polling**: suficiente para el reto, simple de implementar y facil de defender.
 - **OCR mock**: prioriza flujo end-to-end estable. OCR real queda como mejora sin comprometer la entrega base.
+- **Worker idempotente con retry**: evita reprocesar documentos completados y tolera fallos temporales antes de marcar un documento como `failed`.
 
 ## Seguridad y ownership
 

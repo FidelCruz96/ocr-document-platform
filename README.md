@@ -33,7 +33,7 @@ Credenciales demo:
 2. El usuario sube un archivo JPG, PNG o PDF de hasta 10 MB.
 3. El backend valida el archivo, lo guarda en MinIO y persiste metadata en PostgreSQL.
 4. El backend encola un job Celery en Redis.
-5. El worker descarga el archivo, ejecuta OCR mock y actualiza el estado.
+5. El worker descarga el archivo, ejecuta OCR mock reemplazable y actualiza el estado.
 6. El frontend consulta el estado con polling cada 2.5 segundos hasta `completed` o `failed`.
 
 ## Endpoints principales
@@ -67,8 +67,10 @@ Los valores locales de desarrollo estan definidos en `docker-compose.yml`. No us
 ## Limitaciones
 
 - El OCR es mock controlado para asegurar el flujo completo del reto.
+- El worker tiene idempotencia basica para no reprocesar documentos completados y retries simples para errores temporales.
 - No hay registro de usuarios; se crea un usuario seed local.
 - No se incluyen migraciones Alembic en v1; el backend crea tablas al iniciar para simplificar la demo.
+- Las decisiones tecnicas principales estan documentadas en `DECISIONS.md`.
 
 ## Mejoras futuras
 
