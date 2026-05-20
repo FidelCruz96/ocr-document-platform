@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { uploadDocument } from "@/lib/api";
 import { ErrorMessage } from "./ErrorMessage";
 
@@ -11,6 +11,7 @@ export function DocumentUploader({
   token: string;
   onUploaded: () => void;
 }) {
+  const formRef = useRef<HTMLFormElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +28,7 @@ export function DocumentUploader({
     try {
       await uploadDocument(token, file);
       setFile(null);
-      event.currentTarget.reset();
+      formRef.current?.reset();
       onUploaded();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload failed");
@@ -39,7 +40,7 @@ export function DocumentUploader({
   return (
     <section className="panel">
       <h2>Upload document</h2>
-      <form className="form" onSubmit={handleSubmit}>
+      <form className="form" onSubmit={handleSubmit} ref={formRef}>
         <label className="field">
           <span>JPG, PNG or PDF up to 10 MB</span>
           <input
