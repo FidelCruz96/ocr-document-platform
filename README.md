@@ -50,6 +50,34 @@ Credenciales demo:
 
 Los endpoints de documentos requieren `Authorization: Bearer <token>`.
 
+## Decisiones tecnicas
+
+Ver `DECISIONS.md` para el detalle de tradeoffs principales:
+
+- Celery + Redis para procesamiento en background.
+- MinIO para storage de archivos originales.
+- Polling en frontend en lugar de WebSockets.
+- OCR mock como proveedor reemplazable.
+- JWT para autenticacion stateless.
+- Creacion automatica de tablas para simplificar la demo local.
+
+## Validacion realizada
+
+- `docker compose build`
+- `docker compose run --rm --no-deps backend pytest -q`
+- `docker compose run --rm --no-deps frontend npm audit --omit=dev`
+- `docker compose config`
+- Flujo manual: login, upload PNG, procesamiento Celery y OCR en estado `completed`.
+
+## Seguridad
+
+- Passwords hasheados con bcrypt.
+- JWT con expiracion.
+- CORS restringido al frontend local.
+- Consultas de documentos filtradas por `user_id`.
+- Si el documento no pertenece al usuario autenticado, la API responde `404`.
+- Para esta demo el frontend guarda el token en `localStorage`; en produccion se recomienda cookie `HttpOnly`, `Secure` y `SameSite`.
+
 ## Variables de entorno relevantes
 
 - `DATABASE_URL`
@@ -63,6 +91,7 @@ Los endpoints de documentos requieren `Authorization: Bearer <token>`.
 - `NEXT_PUBLIC_API_BASE_URL`
 
 Los valores locales de desarrollo estan definidos en `docker-compose.yml`. No usar esos valores en produccion.
+Tambien hay ejemplos en `backend/.env.example` y `frontend/.env.example`.
 
 ## Limitaciones
 
